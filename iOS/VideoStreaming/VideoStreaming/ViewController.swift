@@ -8,10 +8,29 @@
 import UIKit
 import SceneKit
 import ARKit
+import Foundation
 
 class ViewController: UIViewController, ARSCNViewDelegate {
-
     @IBOutlet var sceneView: ARSCNView!
+    var videoNode: SCNNode!
+    var player: AVPlayer!
+                
+    func showLiveVideo() {
+        // let fileURL = URL(fileURLWithPath: Bundle.main.path(forResource: "apple", ofType: "mp4")!)
+        let videoURL = URL(string: "http://qthttp.apple.com.edgesuite.net/1010qwoeiuryfg/sl.m3u8")
+        player = AVPlayer(url: videoURL!)
+
+        let videoGeo = SCNPlane(width: 1.6, height: 0.9)
+        videoGeo.firstMaterial?.diffuse.contents = player
+        videoGeo.firstMaterial?.isDoubleSided = true
+        
+        let videoNode = SCNNode(geometry: videoGeo)
+        self.videoNode = videoNode
+        videoNode.position.z = -3
+        
+        sceneView.scene.rootNode.addChildNode(videoNode)
+        player.play()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,11 +41,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
-        // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
-        
-        // Set the scene to the view
-        sceneView.scene = scene
+        // Setting up the scence
+        sceneView.scene = SCNScene()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -37,6 +53,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
         // Run the view's session
         sceneView.session.run(configuration)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        showLiveVideo();
     }
     
     override func viewWillDisappear(_ animated: Bool) {
